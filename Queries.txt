@@ -1,0 +1,76 @@
+			/*Query 1*/
+
+--Which employee made the most sales?
+SELECT e.employeeid,
+       e.firstname||" "||e.lastname employee_name,
+       sum(i.total) total_sales
+FROM employee e
+JOIN customer c ON e.employeeid=c.SupportRepId
+JOIN invoice i ON i.customerid=c.customerid
+GROUP BY 1,
+         2
+ORDER BY 3 DESC
+			
+			/* Query 2*/
+
+-- Who is writing the rock music?
+SELECT artist.artistid,
+       artist.name,
+       count(*) song_count
+FROM artist
+JOIN album ON artist.artistid=album.artistid
+JOIN track ON album.albumid=track.AlbumId
+JOIN genre ON genre.genreid=Track.genreid
+WHERE genre.name='Rock'
+GROUP BY 1,
+         2
+ORDER BY 3 DESC
+LIMIT 10;
+			/* Query 3*/
+
+--Which Artist has earned the most ?
+WITH most_earning_artist AS
+  (SELECT at.name artist_name,
+          il.InvoiceId,
+          sum(il.UnitPrice*il.Quantity) AS total_earnings
+   FROM invoiceline il
+   JOIN track t ON il.TrackId=t.TrackId
+   JOIN album al ON al.AlbumId = t.AlbumId
+   JOIN artist AT ON al.ArtistId=at.ArtistId
+   GROUP BY artist_name
+   ORDER BY 3 DESC)
+SELECT * From most_earning_artist 
+
+			/*Query 4 */
+
+--Who is the best customer ??
+WITH most_earning_artist AS
+  (SELECT at.name artist_name,
+          il.InvoiceId,
+          sum(il.UnitPrice*il.Quantity) AS total_earnings
+   FROM invoiceline il
+   JOIN track t ON il.TrackId=t.TrackId
+   JOIN album al ON al.AlbumId = t.AlbumId
+   JOIN artist AT ON al.ArtistId=at.ArtistId
+   GROUP BY artist_name
+   ORDER BY 3 DESC)
+SELECT at.name,
+       FirstName,
+       LastName,
+       firstName||" "||lastname fullname,
+       c.CustomerId,
+       sum(il.UnitPrice*il.Quantity) AS Amount_spent
+FROM customer c
+JOIN invoice i ON c.customerid=i.CustomerId
+JOIN invoiceline il ON il.InvoiceId=i.InvoiceId
+JOIN track t ON il.TrackId=t.TrackId
+JOIN album al ON al.AlbumId = t.AlbumId
+JOIN artist AT ON al.ArtistId=at.ArtistId
+WHERE at.Name=
+    (SELECT artist_name
+     FROM most_earning_artist
+     LIMIT 1)
+GROUP BY 1,
+         2,
+         3
+ORDER BY 6 DESC
